@@ -1,6 +1,6 @@
 import { backend } from "declarations/backend";
 
-const LIBRE_TRANSLATE_API = "https://libretranslate.de/translate";
+const TRANSLATE_API = "https://api.mymemory.translated.net/get";
 
 // DOM Elements
 const sourceText = document.getElementById("sourceText");
@@ -26,29 +26,38 @@ loadVoices();
 // Translation function
 async function translateText() {
     const text = sourceText.value.trim();
-    if (!text) return;
+    if (!text) {
+        translatedText.value = "Please enter some text to translate";
+        return;
+    }
+
+    translateBtn.disabled = true;
+    translatedText.value = "Translating...";
 
     try {
-        const response = await fetch(LIBRE_TRANSLATE_API, {
-            method: "POST",
-            body: JSON.stringify({
-                q: text,
-                source: "en",
-                target: targetLang.value,
-            }),
-            headers: { "Content-Type": "application/json" }
-        });
-
+        const langPair = `en|${targetLang.value}`;
+        const url = `${TRANSLATE_API}?q=${encodeURIComponent(text)}&langpair=${langPair}`;
+        
+        const response = await fetch(url);
         const data = await response.json();
-        translatedText.value = data.translatedText;
-        speakBtn.disabled = false;
 
-        // Store in backend
-        await backend.addTranslation(text, targetLang.value, data.translatedText);
-        await updateHistory();
+        if (data.responseStatus === 200 && data.responseData) {
+            const translatedResult = data.responseData.translatedText;
+            translatedText.value = translatedResult;
+            speakBtn.disabled = false;
+
+            // Store in backend
+            await backend.addTranslation(text, targetLang.value, translatedResult);
+            await updateHistory();
+        } else {
+            throw new Error(data.responseDetails || "Translation failed");
+        }
     } catch (error) {
         console.error("Translation error:", error);
-        translatedText.value = "Translation error occurred. Please try again.";
+        translatedText.value = `Translation error: ${error.message || "Please try again"}`;
+        speakBtn.disabled = true;
+    } finally {
+        translateBtn.disabled = false;
     }
 }
 
@@ -78,12 +87,17 @@ function speakText() {
 
 // Update history display
 async function updateHistory() {
-    const history = await backend.getHistory();
-    historyList.innerHTML = history.reverse().slice(0, 5).map(([source, target, translation]) => `
-        <div class="history-item">
-            <strong>${source}</strong> → ${translation} (${target})
-        </div>
-    `).join("");
+    try {
+        const history = await backend.getHistory();
+        historyList.innerHTML = history.reverse().slice(0, 5).map(([source, target, translation]) => `
+            <div class="history-item">
+                <strong>${source}</strong> → ${translation} (${target})
+            </div>
+        `).join("");
+    } catch (error) {
+        console.error("Error loading history:", error);
+        historyList.innerHTML = "<div class='error'>Failed to load translation history</div>";
+    }
 }
 
 // Event listeners
@@ -92,3 +106,8 @@ speakBtn.addEventListener("click", speakText);
 
 // Initial history load
 updateHistory();
+
+// Add input listener to enable/disable translate button
+sourceText.addEventListener("input", () => {
+    translateBtn.disabled = !sourceText.value.trim();
+});
