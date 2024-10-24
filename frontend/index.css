@@ -46,6 +46,19 @@ select {
     background-color: white;
 }
 
+.voice-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.voice-controls select {
+    width: 40%;
+}
+
+.voice-controls button {
+    width: 60%;
+}
+
 button {
     width: 100%;
     padding: 12px;
@@ -55,17 +68,29 @@ button {
     background-color: #1a73e8;
     color: white;
     cursor: pointer;
-    transition: background-color 0.3s, opacity 0.3s;
+    transition: all 0.3s ease;
 }
 
 button:hover:not(:disabled) {
     background-color: #1557b0;
+    transform: scale(1.02);
 }
 
 button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
     opacity: 0.7;
+}
+
+.speaking {
+    animation: pulse 1s infinite;
+    background-color: #34a853;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 .history-box {

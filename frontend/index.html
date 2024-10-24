@@ -24,7 +24,15 @@
             
             <div class="result-box">
                 <textarea id="translatedText" readonly placeholder="Translation will appear here..."></textarea>
-                <button id="speakBtn" disabled>🔊 Speak It Funny!</button>
+                <div class="voice-controls">
+                    <button id="speakBtn" disabled>🔊 Speak It Funny!</button>
+                    <select id="voiceStyle">
+                        <option value="chipmunk">Chipmunk</option>
+                        <option value="robot">Robot</option>
+                        <option value="giant">Giant</option>
+                        <option value="random">Random Funny Voice</option>
+                    </select>
+                </div>
             </div>
         </div>
 
