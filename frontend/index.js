@@ -9,6 +9,7 @@ const translateBtn = document.getElementById("translateBtn");
 const translatedText = document.getElementById("translatedText");
 const speakBtn = document.getElementById("speakBtn");
 const voiceStyle = document.getElementById("voiceStyle");
+const volumeWarning = document.getElementById("volumeWarning");
 const historyList = document.getElementById("historyList");
 
 // Speech synthesis setup
@@ -20,6 +21,7 @@ const voiceStyles = {
     chipmunk: { pitch: 2.0, rate: 1.5 },
     robot: { pitch: 0.5, rate: 0.7 },
     giant: { pitch: 0.3, rate: 0.6 },
+    monkey: { pitch: 2.5, rate: 1.2 },
     random: () => ({
         pitch: 0.1 + Math.random() * 2.9,
         rate: 0.1 + Math.random() * 2.9
@@ -34,6 +36,11 @@ function loadVoices() {
 // Load voices when they're ready
 speechSynthesis.onvoiceschanged = loadVoices;
 loadVoices();
+
+// Show/hide volume warning
+voiceStyle.addEventListener('change', (e) => {
+    volumeWarning.style.display = e.target.value === 'monkey' ? 'block' : 'none';
+});
 
 // Translation function
 async function translateText() {
@@ -72,10 +79,47 @@ async function translateText() {
     }
 }
 
+// Create monkey screech effect
+function createMonkeyScreech(text) {
+    const words = text.split(' ');
+    let delay = 0;
+    
+    words.forEach((word) => {
+        // Create multiple utterances for each word to simulate screeching
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.pitch = 2.5 + (Math.random() * 0.5);
+                utterance.rate = 1.2 + (Math.random() * 0.4);
+                utterance.volume = 0.7 + (Math.random() * 0.3);
+                
+                // Add random pitch variations
+                utterance.onboundary = (event) => {
+                    if (event.name === 'word') {
+                        utterance.pitch = 2.5 + (Math.sin(Date.now() * 0.01) * 0.5);
+                    }
+                };
+                
+                speechSynthesis.speak(utterance);
+            }, delay);
+            delay += 200;
+        }
+        delay += 500;
+    });
+}
+
 // Speak function with funny voice effect
 function speakText() {
     if (speechSynthesis.speaking) {
         speechSynthesis.cancel();
+    }
+
+    const style = voiceStyle.value;
+    
+    // Special handling for monkey voice
+    if (style === 'monkey') {
+        createMonkeyScreech(translatedText.value);
+        return;
     }
 
     const utterance = new SpeechSynthesisUtterance(translatedText.value);
@@ -90,7 +134,6 @@ function speakText() {
     }
 
     // Apply voice style
-    const style = voiceStyle.value;
     const voiceEffect = style === 'random' 
         ? voiceStyles.random()
         : voiceStyles[style];
