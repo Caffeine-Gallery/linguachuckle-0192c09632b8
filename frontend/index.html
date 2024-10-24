@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fun Translator</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Fun Translator 🎭</h1>
+        
+        <div class="translation-box">
+            <textarea id="sourceText" placeholder="Enter English text here..."></textarea>
+            
+            <select id="targetLang">
+                <option value="de">German</option>
+                <option value="fr">French</option>
+                <option value="th">Thai</option>
+                <option value="es">Spanish</option>
+            </select>
+
+            <button id="translateBtn">Translate</button>
+            
+            <div class="result-box">
+                <textarea id="translatedText" readonly placeholder="Translation will appear here..."></textarea>
+                <button id="speakBtn" disabled>🔊 Speak It Funny!</button>
+            </div>
+        </div>
+
+        <div class="history-box">
+            <h2>Recent Translations</h2>
+            <div id="historyList"></div>
+        </div>
+    </div>
+    <script type="module" src="index.js"></script>
+</body>
+</html>

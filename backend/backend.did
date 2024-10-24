@@ -1,0 +1,8 @@
+service : {
+  addTranslation: (text, text, text) -> ();
+  getHistory: () -> (vec record {
+                           text;
+                           text;
+                           text;
+                         }) query;
+}
